@@ -1,6 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
+import { formSchemaType } from "@/schemas/form";
 import { currentUser } from "@clerk/nextjs";
 
 
@@ -37,4 +38,7 @@ export async function GetFormStats(){
     }
 }
 
-export async function CreateForm(data:{name:string, description:string | undefined}){}
+export async function CreateForm(data:formSchemaType){
+    console.log('Name on Server',data.name);
+    
+}

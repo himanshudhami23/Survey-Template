@@ -29,16 +29,13 @@ import { useForm } from 'react-hook-form';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { toast } from 'sonner';
+import { formSchema, formSchemaType } from '@/schemas/form';
+import { CreateForm } from '@/action/form';
 
 
 
 
-const formSchema = z.object({
-    name:z.string().min(4),
-    description: z.string().optional(),
-});
 
-type formSchemaType = z.infer<typeof formSchema>
 
 
 function CreateFormBtn() {
@@ -48,7 +45,7 @@ function CreateFormBtn() {
 
     function onSubmit(values:formSchemaType){
         try {
-            
+            await CreateForm(values);
         } catch (error) {
             toast({
                 title:"Error",
