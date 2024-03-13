@@ -17,7 +17,7 @@ function ThemeSwitcher() {
     <Tabs defaultValue={theme}>
         <TabsList className="border">
             <TabsTrigger value="light" onClick={()=> setTheme("light")}>
-                <SunIcon className="h-[1.2rem] w-[1.2 rem]" />
+                <SunIcon className="h-[1.2rem] w-[1.6 rem]" />
             </TabsTrigger>
             <TabsTrigger value="dark" onClick={()=> setTheme("dark")}>
                 <MoonIcon className="h-[1.2rem] w-[1.2 rem] rotate-90 transition-all dark:rotate-0" />
