@@ -28,9 +28,11 @@ import * as z from "zod";
 import { useForm } from 'react-hook-form';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
-import { toast } from 'sonner';
+import { toast } from './ui/use-toast';
 import { formSchema, formSchemaType } from '@/schemas/form';
 import { CreateForm } from '@/action/form';
+import { useRouter } from 'next/navigation';
+
 
 
 
@@ -39,18 +41,25 @@ import { CreateForm } from '@/action/form';
 
 
 function CreateFormBtn() {
+    const router = useRouter();
     const form = useForm<formSchemaType>({
         resolver: zodResolver(formSchema),
     });
 
-    function onSubmit(values:formSchemaType){
+   async function onSubmit(values:formSchemaType){
         try {
-            await CreateForm(values);
+            const formId =  await CreateForm(values);
+            toast({
+                title:"Success",
+                description: "Form Create Successfully.",
+            });
+          router.push(`/builder/${formId}`);
+            
         } catch (error) {
             toast({
                 title:"Error",
                 description: "Something went wrong",
-                variant:"destructive"
+                variant:"destructive",
             });
         }
         
@@ -58,7 +67,13 @@ function CreateFormBtn() {
   return (
     <Dialog>
         <DialogTrigger asChild>
-            <Button>Create New Form</Button>
+            <Button variant={"outline"} className="group border border-primary/20 h-[190px]
+            item-center justify-center flex flex-col hover:border-primary
+            hover:cursor-pointer border-dashed gap-4 " >
+                <BsFileEarmarkPlus className="h-8 w-8 text-muted-foreground
+                group-hover:text-primary" />
+               <p className="font-bold text-xl text-muted-foreground 
+               group-hover:text-primary" >Create New Form</p> </Button>
         </DialogTrigger>
         <DialogContent>
             <DialogHeader>
@@ -99,9 +114,7 @@ function CreateFormBtn() {
             </Form>
             <DialogFooter>
                 <Button
-                onClick={()=>{
-                    form.handleSubmit(onSubmit);
-                }}
+                onClick={form.handleSubmit(onSubmit)}
                 disabled={form.formState.isSubmitting} className="w-full mt-4">
                     {!form.formState.isSubmitting && <span>Save</span>} 
                     {form.formState.isSubmitting && (

@@ -16,13 +16,13 @@ function ThemeSwitcher() {
   return (
     <Tabs defaultValue={theme}>
         <TabsList className="border">
-            <TabsTrigger value="light" onClick={()=> setTheme("light")}>
+            <TabsTrigger className="mr-3 mt-2 ml-2" value="light" onClick={()=> setTheme("light")}>
                 <SunIcon className="h-[1.2rem] w-[1.6 rem]" />
             </TabsTrigger>
-            <TabsTrigger value="dark" onClick={()=> setTheme("dark")}>
+            <TabsTrigger className="mr-3 " value="dark" onClick={()=> setTheme("dark")}>
                 <MoonIcon className="h-[1.2rem] w-[1.2 rem] rotate-90 transition-all dark:rotate-0" />
             </TabsTrigger>
-            <TabsTrigger value="system" onClick={()=> setTheme("system")}>
+            <TabsTrigger className="mr-3" value="system" onClick={()=> setTheme("system")}>
                 <DesktopIcon className="h-[1.2rem] w-[1.2 rem]" />
             </TabsTrigger>
         </TabsList>
