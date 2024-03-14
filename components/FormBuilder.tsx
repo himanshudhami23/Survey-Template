@@ -4,10 +4,12 @@ import React from 'react';
 import PreviewDialogBtn from './PreviewDialogBtn';
 import SaveFormBtn from './SaveFormBtn';
 import PublishFormBtn from './PublishFormBtn';
-
+import Designer from './Designer';
+import { DndContext } from '@dnd-kit/core';
 function FormBuilder({form}:{form:Form}) {
   return (
-    <main className='flex flex-col w-full'>
+    <DndContext>
+        <main className='flex flex-col w-full'>
         <nav className='flex justify-between border-b-2 p-4 gap-3 
         items-center'>
             <h2 className='truncate font-medium'>
@@ -24,8 +26,12 @@ function FormBuilder({form}:{form:Form}) {
                 )}
             </div>
         </nav>
-    <div className=''></div>
+    <div className='flex w-full flex-grow item-center justify-center 
+    relative overflow-y-auto h-[120px] bg-accent bg-[url(/paper.svg)] dark:bg-[url(/paper-dark.svg)]'>
+        <Designer/>
+    </div>
     </main>
+    </DndContext>
   )
 }
 
