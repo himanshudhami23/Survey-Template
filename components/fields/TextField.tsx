@@ -4,7 +4,12 @@ import { MdTextFields } from "react-icons/md";
 import { ElementsType, FormElement, FormElementInstance } from "../FormElements";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
-
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
+import useDesigner from "../hooks/useDesigner";
+import {Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage,} from "../ui/form";
 
 const type:ElementsType = "TextField";
 const extraAttributes = {
@@ -12,7 +17,14 @@ const extraAttributes = {
             helperText:"Helper Text",
             required:false,
             placeHolder:"Value Here...",
-}
+};
+
+const propertiesSchema = z.object({
+    label : z.string().min(2).max(100),
+    helpText:z.string().max(200),
+    required:z.boolean().default(false),
+    placeHolder: z.string().max(60),
+});
 export const TextFieldFormElement:FormElement={
     type,
     construct:(id:string)=>({
@@ -26,11 +38,82 @@ export const TextFieldFormElement:FormElement={
     },
     designerComponent:DesignerComponent,
     formComponent:()=><div>Form Component</div>,
-    propertiesComponent:()=><div>Properties Component</div>,
+    propertiesComponent:PropertiesComponent,
 };
 
 type CustomInstance = FormElementInstance &{
     extraAttributes: typeof extraAttributes;
+}
+
+type propertiesFormSchemaType = z.infer<typeof propertiesSchema>;
+
+function PropertiesComponent({
+    elementInstance
+}:
+    {
+        elementInstance:FormElementInstance
+    }){
+    const element = elementInstance as CustomInstance;
+    const {updateElement} = useDesigner();
+    const form = useForm<propertiesFormSchemaType>({
+        resolver: zodResolver(propertiesSchema),
+        mode:"onBlur",
+        defaultValues:{
+            label:element.extraAttributes.label,
+            helperText: element.extraAttributes.helperText,
+            required: element.extraAttributes.required,
+            placeHolder: element.extraAttributes.placeHolder,
+        },
+    });
+
+    useEffect(()=>{
+        form.reset(element.extraAttributes);
+    },[element, form]);
+
+    function applyChanges(values:propertiesFormSchemaType){
+        const {label,helperText,placeHolder,required} = values;
+        updateElement(element.id,{
+            ...element,
+            extraAttributes:{
+                label,
+                helperText,
+                placeHolder,
+                required,
+
+            },
+        });
+    }
+    return (
+    <Form {...form} >
+        <form onBlur={form.handleSubmit(applyChanges)} 
+        onSubmit={(e)=>{
+            e.preventDefault();
+        }}
+        className="space-y-3">
+            <FormField
+            control={form.control}
+            name="label"
+            render={({field})=>(
+                <FormItem>
+                    <FormLabel>Label</FormLabel>
+                    <FormControl>
+                        <Input {...field}
+                        onKeyDown={(e)=>{
+                            if(e.key === "Enter") e.currentTarget.blur();
+                        }} 
+                        />
+                    </FormControl>
+                    <FormDescription>
+                        The label of the field. <br/> It will displayed above the field.
+                    </FormDescription>
+                    <FormMessage/>
+                </FormItem>
+            )}
+        />
+            
+        </form>
+    </Form>
+    );
 }
 
 function DesignerComponent({elementInstance,}:{
