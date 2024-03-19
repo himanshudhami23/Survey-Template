@@ -36,7 +36,7 @@ function FormBuilder({form}:{form:Form}) {
                 <PreviewDialogBtn/>
                 {!form.published &&(
                     <>
-                    <SaveFormBtn/>
+                    <SaveFormBtn id={form.id}/>
                     <PublishFormBtn/>
                     </>
                 )}
