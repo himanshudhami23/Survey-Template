@@ -4,12 +4,13 @@ import { MdTextFields } from "react-icons/md";
 import { ElementsType, FormElement, FormElementInstance } from "../FormElements";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
-import { z } from "zod";
+import { z } from "zod"; 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import useDesigner from "../hooks/useDesigner";
 import {Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage,} from "../ui/form";
+import { Switch } from "../ui/switch";
 
 const type:ElementsType = "TextField";
 const extraAttributes = {
@@ -20,8 +21,8 @@ const extraAttributes = {
 };
 
 const propertiesSchema = z.object({
-    label : z.string().min(2).max(100),
-    helpText:z.string().max(200),
+    label : z.string().min(2).max(50),
+    helperText:z.string().max(200),
     required:z.boolean().default(false),
     placeHolder: z.string().max(60),
 });
@@ -50,9 +51,8 @@ type propertiesFormSchemaType = z.infer<typeof propertiesSchema>;
 function PropertiesComponent({
     elementInstance
 }:
-    {
-        elementInstance:FormElementInstance
-    }){
+{elementInstance:FormElementInstance;})
+{
     const element = elementInstance as CustomInstance;
     const {updateElement} = useDesigner();
     const form = useForm<propertiesFormSchemaType>({
@@ -110,7 +110,65 @@ function PropertiesComponent({
                 </FormItem>
             )}
         />
-            
+        <FormField
+            control={form.control}
+            name="placeHolder"
+            render={({field})=>(
+                <FormItem>
+                    <FormLabel>PlaceHolder</FormLabel>
+                    <FormControl>
+                        <Input {...field}
+                        onKeyDown={(e)=>{
+                            if(e.key === "Enter") e.currentTarget.blur();
+                        }} 
+                        />
+                    </FormControl>
+                    <FormDescription>
+                      The Placeholder of the field.
+                    </FormDescription>
+                    <FormMessage/>
+                </FormItem>
+            )}
+        />
+        <FormField
+            control={form.control}
+            name="helperText"
+            render={({field})=>(
+                <FormItem>
+                    <FormLabel>Helper Text</FormLabel>
+                    <FormControl>
+                        <Input {...field}
+                        onKeyDown={(e)=>{
+                            if(e.key === "Enter") e.currentTarget.blur();
+                        }} 
+                        />
+                    </FormControl>
+                    <FormDescription>
+                      The helper text of the field. <br />
+                      It will be displayed below the field.
+                    </FormDescription>
+                    <FormMessage/>
+                </FormItem>
+            )}
+        />
+           <FormField
+            control={form.control}
+            name="required"
+            render={({field})=>(
+                <FormItem className="flex items-center justify-between rounded-lg border p-3 shadow-sm">
+                    <div className="space-y-0.5">
+                    <FormLabel>Required</FormLabel>
+                    <FormDescription>
+                      The Placeholder of the field.
+                    </FormDescription>                    
+                    <FormControl>
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                    </div>
+                    <FormMessage/>
+                </FormItem>
+            )}
+        /> 
         </form>
     </Form>
     );

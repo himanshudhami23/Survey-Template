@@ -10,7 +10,7 @@ import { Button } from './ui/button';
 import { BiSolidTrash } from 'react-icons/bi';
 // import { FormElementInstance } from './FormElements';
 function Designer() {   
-    const {elements, addElement, selectedElement, setSelectedElement} = useDesigner();
+    const {elements, addElement, selectedElement, setSelectedElement, removeElement} = useDesigner();
     const droppable = useDroppable({
         id:"designer-drop-area",
         data:{
@@ -18,27 +18,99 @@ function Designer() {
         },
     });
 
-    console.log("ELEMENTs",elements);
-    
-
     useDndMonitor({
         onDragEnd:(event:DragEndEvent)=>{
             const {active, over} = event;
             if(!active || !over) return;
 
             const isDesignerBtnElement = active.data?.current?.isDesignerBtnElement;
+            const isDroppingOverDesignerDropArea = over.data?.current?.isDesignerDropArea;
 
-            if(isDesignerBtnElement){
+            // first scenario: dropping a sidebar btn element over the designer drop area
+
+            const droppingSidebarBtnOverDesignerDropArea = isDesignerBtnElement && isDroppingOverDesignerDropArea;
+            if(droppingSidebarBtnOverDesignerDropArea){
+                
+                const type = active.data?.current?.type;
+                const newElement = FormElements[type as ElementsType].construct(
+                    idGenerator()                   
+                );
+                addElement(elements.length,newElement);  
+                return;             
+            }
+
+
+            const isDroppingOverDesignerElementTopHalf = 
+            over.data?.current?.isTopHalfDesignerElement;
+
+            const isDroppingOverDesignerElementBottomHalf = 
+            over.data?.current?.isBottomHalfDesignerElement;
+
+            const isDroppingOverDesignerElement = 
+            isDroppingOverDesignerElementTopHalf || isDroppingOverDesignerElementBottomHalf;
+
+            const droppingSidebarBtnOverDesignerElement  = isDesignerBtnElement && isDroppingOverDesignerElement;
+          
+            //Second Scenario:
+            if(droppingSidebarBtnOverDesignerElement){
                 const type = active.data?.current?.type;
                 const newElement = FormElements[type as ElementsType].construct(
                     idGenerator()                   
                 );
 
-                addElement(0,newElement);
-                console.log("new Element",newElement);
+                const overId = over.data?.current?.elementId;
+                const overElementIndex = elements.findIndex((el)=> el.id === overId) ;
+
+                if(overElementIndex === -1){
+                    throw new Error("Element not found");
+                }
+
+                let indexForNewElement = overElementIndex;
+
+                if(isDroppingOverDesignerElementBottomHalf){
+                    indexForNewElement = overElementIndex + 1;
+                }
+
+                addElement(indexForNewElement,newElement);  
+                return; 
             }
-            console.log("drag end",event);
+
+            // Third scenario
+
+            const isDraggingDesignerElement = active.data?.current?.isDesignerElement;
+
+            const draggingDesignerElementOverAnotherDesignerElement = isDroppingOverDesignerElement && isDraggingDesignerElement ;
+        
+            if(draggingDesignerElementOverAnotherDesignerElement){
+                const activeId = active.data?.current?.elementId;
+                const overId = over.data?.current?.elementId;
+
+                const activeElementIndex = elements.findIndex((el)=>el.id===activeId);
+                const overElementIndex = elements.findIndex((el)=>el.id===overId);
+
+                if(activeElementIndex=== -1 || overElementIndex=== -1){
+                    throw new Error("Element not found");
+                }
+
+                const activeElement = {...elements[activeElementIndex]};
+                removeElement(activeId);
+
+
+                let indexForNewElement = overElementIndex;
+
+                if(isDroppingOverDesignerElementBottomHalf){
+                    indexForNewElement = overElementIndex + 1;
+                }
+                
+                addElement(indexForNewElement, activeElement);
+            }
+        
+        
+        
+        
+        
         },
+
     });
 
   return (
@@ -65,13 +137,13 @@ function Designer() {
                         <div className="h-[120px] rounded-md bg-primary/20"></div>
                     </div>
                 )}
-                {elements.length >0 && 
+                {elements.length >0 && (
                     <div className="flex flex-col w-full gap-2 p-4">
                         {elements.map((element)=>(
                             <DesignerElementWrapper key={element.id} element={element}/>
                         ))}
                     </div>
-                }
+                )}
             </div>
         </div>
         <DesignerSidebar/>
@@ -118,7 +190,8 @@ function DesignerElementWrapper({element}:{element:FormElementInstance}){
     
     const DesignerElement = FormElements[element.type].designerComponent;
     return (
-        <div ref={draggable.setNodeRef}
+        <div 
+        ref={draggable.setNodeRef}
         {...draggable.listeners}
         {...draggable.attributes}
          className="relative h-[120px] flex flex-col text-foreground
@@ -136,8 +209,12 @@ function DesignerElementWrapper({element}:{element:FormElementInstance}){
             setSelectedElement(element);
         }}
         >
-        <div ref={topHalf.setNodeRef} className="absolute w-full h-1/2 rounded-t-md"/>
-        <div ref={bottomHalf.setNodeRef} className="absolute w-full bottom-0 h-1/2 rounded-b-md"/>
+        <div ref={topHalf.setNodeRef} 
+        className="absolute w-full h-1/2 rounded-t-md"
+        />
+        <div ref={bottomHalf.setNodeRef} 
+        className="absolute w-full bottom-0 h-1/2 rounded-b-md"
+        />
         {mouseIsOver && (
                 <>
                     <div className="absolute right-0 h-full">
