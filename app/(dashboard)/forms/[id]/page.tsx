@@ -1,4 +1,4 @@
-import { GetFormById } from "@/action/form";
+import { GetFormById, GetFormWithSubmission } from "@/action/form";
 import FormLinkShare from "@/components/FormLinkShare";
 import VisitBtn from "@/components/VisitBtn";
 import React from "react";
@@ -7,6 +7,7 @@ import {LuView} from "react-icons/lu";
 import {FaWpforms} from "react-icons/fa";
 import {HiCursorClick} from "react-icons/hi";
 import {TbArrowBounce} from "react-icons/tb";
+import { ElementsType, FormElementInstance } from "@/components/FormElements";
 
 
 
@@ -87,10 +88,25 @@ async function FormDetailPage({params,}:
 
 export default FormDetailPage;
 
-function SubmissionTable({id}:{id:number}) {
+async function SubmissionTable({id}:{id:number}) {
+  const form = await GetFormWithSubmission(id);
 
-  return (<>
+  if(!form){
+    throw new Error("Form not found");
+  }
+
+  const formElements=  JSON.parse(form.content) as FormElementInstance[];
+  const columns :{
+    id:string;
+    label:string;
+    required: boolean;
+    type: ElementsType
+  }
+
+  return (
+  <>
   <h1 className="text-2xl font-bold my-4">Submissions</h1>
-  </>);
+  </>
+  );
   
 }
