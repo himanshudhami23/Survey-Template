@@ -3,7 +3,7 @@ import React,{ ReactNode }  from "react";
 function layout({children}:{children:ReactNode}) {
   return (
     <div 
-    className="flex w-full flex-col flex-grow margin-auto">{children}
+    className="flex w-full flex-col flex-grow margin-auto">{children} 
     </div>
   );
   
